@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spin & Jawab: Pengembaraan Matematik</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+button{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-appearance:none}
+body{font-family:"Comic Sans MS","Trebuchet MS",Arial,sans-serif;min-height:100vh;color:#fff;overflow-x:hidden;
+background:linear-gradient(180deg,#1a237e 0%,#3949ab 40%,#29b6f6 85%,#ffe082 100%);background-attachment:fixed}
+.star{position:fixed;background:#fff9c4;border-radius:50%;animation:tw 2s infinite alternate;pointer-events:none;z-index:0}
+@keyframes tw{from{opacity:.2}to{opacity:1}}
+.deco{position:fixed;font-size:44px;pointer-events:none;z-index:0;opacity:.85}
+.cloud{animation:drift 40s linear infinite}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(110vw)}}
+.screen{display:none;position:relative;z-index:1;padding:14px;max-width:1000px;margin:0 auto;text-align:center}
+.screen.on{display:block}
+h1{font-size:clamp(34px,9vw,70px);color:#ffeb3b;text-shadow:3px 3px 0 #e65100,6px 6px 0 rgba(0,0,0,.25);line-height:1.05}
+h2{font-size:clamp(20px,5vw,34px);color:#fff;text-shadow:2px 2px 0 #1a237e;margin:6px 0 16px}
+.btn{font-family:inherit;font-weight:bold;font-size:clamp(22px,5vw,32px);border:none;border-radius:50px;padding:16px 34px;cursor:pointer;
+background:linear-gradient(#ffca28,#ff6f00);color:#fff;text-shadow:1px 2px 0 rgba(0,0,0,.35);box-shadow:0 7px 0 #bf360c,0 12px 18px rgba(0,0,0,.35);min-height:64px;transition:transform .1s}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 #bf360c}
+.btn:disabled{filter:grayscale(.9);opacity:.55;cursor:not-allowed}
+.btn.green{background:linear-gradient(#66bb6a,#2e7d32);box-shadow:0 7px 0 #1b5e20,0 12px 18px rgba(0,0,0,.35)}
+#snd{position:fixed;top:10px;right:10px;z-index:20;font-size:16px;padding:10px 14px;min-height:0;border-radius:30px}
+.hero{margin-top:5vh}
+.hero p{font-size:clamp(18px,4vw,28px);margin:22px auto 30px;max-width:640px;background:rgba(0,0,0,.3);padding:14px;border-radius:20px}
+.big{font-size:90px;animation:bob 1.5s infinite alternate}
+@keyframes bob{to{transform:translateY(-14px) rotate(6deg)}}
+.stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:44px 0 8px}
+.stat{background:rgba(0,0,0,.35);border-radius:16px;padding:6px 14px;font-size:clamp(14px,3.5vw,22px);min-width:90px}
+.stat b{display:block;font-size:clamp(22px,5vw,34px);color:#ffeb3b}
+.prog{height:22px;background:rgba(0,0,0,.35);border-radius:20px;overflow:hidden;margin:8px auto;max-width:700px;border:3px solid #fff}
+#bar{height:100%;width:0;background:linear-gradient(90deg,#76ff03,#ffeb3b);transition:width .5s}
+.plabel{font-size:16px}
+.main{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:flex-start;margin-top:10px}
+.wheelbox{position:relative;width:min(86vw,400px)}
+canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4))}
+#ptr{position:absolute;left:50%;top:-14px;transform:translateX(-50%);width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:44px solid #fff;filter:drop-shadow(0 3px 2px rgba(0,0,0,.6));z-index:3}
+#ptr:after{content:"";position:absolute;left:-12px;top:-40px;border-left:12px solid transparent;border-right:12px solid transparent;border-top:30px solid #d50000}
+#spin{margin-top:16px}
+.panel{background:rgba(255,255,255,.95);color:#222;border-radius:26px;padding:18px;width:min(94vw,470px);box-shadow:0 8px 24px rgba(0,0,0,.4);border:6px solid #ffca28;display:none;animation:pop .4s}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.topic{display:inline-block;color:#fff;border-radius:30px;padding:6px 20px;font-size:clamp(18px,4.5vw,26px);font-weight:bold;margin-bottom:10px;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
+#qtext{font-size:clamp(24px,6vw,34px);font-weight:bold;margin:8px 0;color:#1a237e}
+#clk{margin:6px auto}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.opt{font-family:inherit;font-size:clamp(24px,6vw,34px);font-weight:bold;padding:16px 6px;border-radius:20px;border:4px solid #3949ab;background:#e8eaf6;color:#1a237e;cursor:pointer;min-height:76px;box-shadow:0 5px 0 #283593}
+.opt:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #283593}
+.opt:disabled{cursor:default}
+.opt.ok{background:#66bb6a;color:#fff;border-color:#1b5e20;box-shadow:0 5px 0 #1b5e20}
+.opt.no{background:#ef5350;color:#fff;border-color:#b71c1c;box-shadow:0 5px 0 #b71c1c}
+#fb{font-size:clamp(22px,5.5vw,30px);font-weight:bold;margin:6px 0}
+#fb.ok{color:#2e7d32}#fb.no{color:#e65100}
+#ex{font-size:clamp(17px,4vw,22px);margin-bottom:10px;color:#444}
+.conf{position:fixed;top:-50px;font-size:30px;z-index:50;pointer-events:none;animation:fall 2.2s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.chest{font-size:120px;transition:transform .6s}
+.chest.open{animation:op 1s forwards}
+@keyframes op{0%{transform:scale(1)}40%{transform:scale(1.4) rotate(-10deg)}100%{transform:scale(1.2)}}
+.res{background:rgba(0,0,0,.4);border-radius:24px;padding:18px;margin:14px auto;max-width:560px;font-size:clamp(20px,5vw,30px);line-height:1.6}
+.res b{color:#ffeb3b}
+</style>
+</head>
+<body>
+<button class="btn" id="snd">🔊 AKTIFKAN BUNYI</button>
+
+<!-- HALAMAN UTAMA -->
+<section class="screen on" id="s-start">
+<div class="hero">
+<div class="big">🗺️</div>
+<h1>SPIN &amp; JAWAB</h1>
+<h1 style="font-size:clamp(24px,6vw,48px);color:#fff">PENGEMBARAAN MATEMATIK</h1>
+<p>Putar roda, lihat topik yang dipilih dan jawab soalan untuk mengumpul mata!</p>
+<button class="btn green" id="mula">▶️ MULA MAIN</button>
+</div>
+</section>
+
+<!-- PERMAINAN -->
+<section class="screen" id="s-game">
+<div class="stats">
+<div class="stat">⭐ Markah<b id="sc">0</b></div>
+<div class="stat">📋 Dijawab<b id="an">0</b></div>
+<div class="stat">✅ Betul<b id="ok">0</b></div>
+<div class="stat">❌ Salah<b id="ng">0</b></div>
+</div>
+<div class="prog"><div id="bar"></div></div>
+<div class="plabel" id="pl">Kemajuan: 0 / 40</div>
+<div class="main">
+<div>
+<div class="wheelbox"><div id="ptr"></div><canvas id="wh" width="440" height="440"></canvas></div>
+<button class="btn" id="spin">🎡 SPIN SEKARANG!</button>
+</div>
+<div class="panel" id="panel">
+<div class="topic" id="tp"></div>
+<div id="clk"></div>
+<div id="qtext"></div>
+<div class="opts" id="opts"></div>
+<div id="fb"></div>
+<div id="ex"></div>
+<button class="btn" id="next" style="display:none">➡️ SPIN LAGI!</button>
+</div>
+</div>
+</section>
+
+<!-- TAMAT -->
+<section class="screen" id="s-end">
+<div class="hero" style="margin-top:2vh">
+<div class="chest" id="chest">🧰</div>
+<h1 style="font-size:clamp(28px,7vw,56px)">🏆 TAHNIAH, PENGEMBARA MATEMATIK!</h1>
+<div class="res">
+⭐ Markah: <b id="e-sc">0</b> / 400<br>
+✅ Jawapan betul: <b id="e-ok">0</b><br>
+❌ Jawapan salah: <b id="e-ng">0</b><br>
+🎯 Ketepatan: <b id="e-pc">0%</b>
+</div>
+<button class="btn green" id="again">🔄 MAIN SEMULA</button>
+</div>
+</section>
+
+<script>
+"use strict";
+/* ===== DATA ===== */
+const TOPIK=[
+{n:["NOMBOR","ASAS"],full:"NOMBOR ASAS",c:"#e53935",i:"🔢"},
+{n:["OPERASI","TAMBAH"],full:"OPERASI TAMBAH",c:"#1e88e5",i:"➕"},
+{n:["MASA DAN","WAKTU"],full:"MASA DAN WAKTU",c:"#43a047",i:"⏰"},
+{n:["WANG"],full:"WANG",c:"#f9a825",i:"💰"}];
+const L="ABCD";
+// [soalan, "pilihan|dipisah", indeks jawapan betul (0=A), penerangan, jam (jam analog)]
+const BANK=[
+[ ["Apakah nombor selepas 5?","4|6|7|8",1,"Selepas 5 ialah 6."],
+["Apakah nombor sebelum 10?","8|9|11|12",1,"Sebelum 10 ialah 9."],
+["Apakah nombor yang mewakili perkataan TUJUH?","5|6|7|9",2,"TUJUH ialah nombor 7."],
+["Pilih nombor yang paling besar.","3|6|9|2",2,"9 ialah nombor paling besar."],
+["Pilih nombor yang paling kecil.","8|4|6|9",1,"4 ialah nombor paling kecil."],
+["Lengkapkan turutan 2, 3, 4, __.","5|6|7|8",0,"Selepas 4 ialah 5."],
+["Berapakah bilangan jari pada sebelah tangan?","3|4|5|6",2,"Sebelah tangan ada 5 jari. ✋"],
+["Berapakah jumlah objek jika terdapat dua biji epal?","1|2|3|4",1,"🍎🍎 = 2 biji epal."],
+["Apakah nombor selepas 19?","18|20|21|29",1,"Selepas 19 ialah 20."],
+["Susun nombor daripada kecil kepada besar: 3, 1, 2.","1, 2, 3|3, 2, 1|2, 1, 3|1, 3, 2",0,"Susunan betul: 1, 2, 3."] ],
+[ ["1 + 1 = ?","1|2|3|4",1,"1 + 1 = 2"],
+["2 + 3 = ?","4|5|6|7",1,"2 + 3 = 5"],
+["4 + 2 = ?","5|6|7|8",1,"4 + 2 = 6"],
+["5 + 5 = ?","8|9|10|11",2,"5 + 5 = 10"],
+["3 + 4 = ?","6|7|8|9",1,"3 + 4 = 7"],
+["Ali mempunyai 2 biji epal. Ibu memberikan 3 biji lagi. Berapakah jumlah epal Ali?","4|5|6|7",1,"2 + 3 = 5 biji epal. 🍎"],
+["6 + 2 = ?","7|8|9|10",1,"6 + 2 = 8"],
+["7 + 1 = ?","6|7|8|9",2,"7 + 1 = 8"],
+["10 + 5 = ?","10|12|15|20",2,"10 + 5 = 15"],
+["Sara mempunyai 4 batang pensel. Guru memberikan 4 batang lagi. Berapakah jumlah pensel Sara?","6|7|8|9",2,"4 + 4 = 8 batang pensel. ✏️"] ],
+[ ["Jarum pendek pada angka 3 dan jarum panjang pada angka 12. Pukul berapakah sekarang?","12:00|2:00|3:00|6:00",2,"Jarum pendek di 3, jarum panjang di 12 = pukul 3:00.",3],
+["Jarum pendek pada angka 6 dan jarum panjang pada angka 12. Pukul berapakah sekarang?","5:00|6:00|7:00|12:00",1,"Jarum pendek di 6, jarum panjang di 12 = pukul 6:00.",6],
+["Berapakah bilangan minit dalam satu jam?","30|45|60|100",2,"Satu jam ada 60 minit."],
+["Murid pergi ke sekolah pada pukul 7:00 pagi. Waktu ini ialah...","Pagi|Tengah hari|Petang|Malam",0,"Pukul 7:00 pagi ialah waktu pagi. 🌅"],
+["Apakah alat yang digunakan untuk melihat waktu?","Pembaris|Jam|Cawan|Pensel",1,"Jam digunakan untuk melihat waktu. ⏰"],
+["Jarum pendek pada angka 9 dan jarum panjang pada angka 12. Pukul berapakah sekarang?","8:00|9:00|10:00|12:00",1,"Jarum pendek di 9, jarum panjang di 12 = pukul 9:00.",9],
+["Sekarang pukul 2:00. Satu jam kemudian ialah...","1:00|2:00|3:00|4:00",2,"2:00 tambah satu jam = 3:00."],
+["Antara berikut, yang manakah waktu malam?","8:00 pagi|12:00 tengah hari|9:00 malam|3:00 petang",2,"9:00 malam ialah waktu malam. 🌙"],
+["Berapakah jumlah jam dalam satu hari?","12|20|24|60",2,"Satu hari ada 24 jam."],
+["Sekarang pukul 4:00. Satu jam sebelumnya ialah...","2:00|3:00|5:00|6:00",1,"4:00 tolak satu jam = 3:00."] ],
+[ ["Apakah nilai wang kertas RM1?","RM1|RM2|RM5|RM10",0,"Wang kertas RM1 bernilai RM1."],
+["RM1 + RM1 = ?","RM1|RM2|RM3|RM4",1,"RM1 + RM1 = RM2"],
+["RM5 + RM1 = ?","RM4|RM5|RM6|RM7",2,"RM5 + RM1 = RM6"],
+["100 sen bersamaan dengan...","10 sen|50 sen|RM1|RM10",2,"100 sen = RM1."],
+["Ali mempunyai RM10. Dia membeli roti berharga RM3. Berapakah baki wang Ali?","RM5|RM6|RM7|RM8",2,"RM10 − RM3 = RM7."],
+["Sebatang pensel berharga RM2. Berapakah harga dua batang pensel?","RM2|RM3|RM4|RM5",2,"RM2 + RM2 = RM4."],
+["Wang manakah mempunyai nilai paling tinggi?","RM1|RM5|RM10|RM20",3,"RM20 ialah nilai paling tinggi."],
+["50 sen + 50 sen = ?","50 sen|RM1|RM2|RM5",1,"50 sen + 50 sen = 100 sen = RM1."],
+["Siti mempunyai RM5. Ibu memberikan RM5 lagi. Berapakah jumlah wang Siti?","RM5|RM8|RM10|RM15",2,"RM5 + RM5 = RM10."],
+["Sebuah buku berharga RM6. Amir membayar RM10. Berapakah baki wang Amir?","RM2|RM3|RM4|RM5",2,"RM10 − RM6 = RM4."] ]
+];
+const JUMLAH=40;
+
+/* ===== ELEMEN ===== */
+const $=id=>document.getElementById(id);
+const cv=$("wh"),cx=cv.getContext("2d");
+let rot=0,busy=false,locked=true,st,pool,cur;
+
+/* ===== BUNYI (Web Audio API, dijana setempat; tiada fail audio / internet) ===== */
+let AC=null,master=null,soundOn=true,musicTimer=null,mStep=0,silentEl=null;
+const ACX=window.AudioContext||window.webkitAudioContext;
+function updateBtn(){
+ const on=!!AC&&soundOn;
+ $("snd").textContent=on?"🔇 SENYAP":"🔊 AKTIFKAN BUNYI";
+ $("snd").setAttribute("aria-pressed",on?"true":"false");
+}
+// Mesti dipanggil di dalam klik/sentuhan pengguna (SPIN, MULA, AKTIFKAN BUNYI)
+function initAudio(){
+ if(!ACX)return false;
+ try{
+  if(!AC){
+   AC=new ACX();
+   master=AC.createGain();master.gain.value=soundOn?1:0;master.connect(AC.destination);
+   const b=AC.createBuffer(1,1,22050),n=AC.createBufferSource();   // buka kunci iOS/Safari
+   n.buffer=b;n.connect(AC.destination);n.start(0);
+  }
+  if(AC.state!=="running"){const p=AC.resume();if(p&&p.catch)p.catch(()=>{});}   // sambung semula jika suspended
+  try{if(navigator.audioSession)navigator.audioSession.type="playback";}catch(e){}   // iOS 16.4+
+  try{if(!silentEl){silentEl=new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");silentEl.loop=true;silentEl.volume=.01;}
+      const q=silentEl.play();if(q&&q.catch)q.catch(()=>{});}catch(e){}   // elak suis senyap Safari/iPad menyekat bunyi
+  startMusic();
+ }catch(e){console.warn("Audio gagal dimulakan:",e);AC=null;updateBtn();return false}
+ updateBtn();return true;
+}
+function tone(f,d,type,vol,delay){
+ if(!AC||!soundOn)return;
+ try{
+  const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
+  o.type=type||"sine";o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||.2,t+.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05);
+ }catch(e){console.warn("tone:",e)}
+}
+const sTick=()=>tone(450+Math.random()*150,.06,"triangle",.14);
+const sSpin=()=>{   // bunyi mula putaran (sapuan naik)
+ if(!AC||!soundOn)return;
+ try{const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type="sawtooth";
+  o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(700,t+.7);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+.1);g.gain.exponentialRampToValueAtTime(0.0001,t+.8);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+.9);}catch(e){}
+};
+const sBell=()=>{tone(880,.9,"sine",.25);tone(1760,.6,"sine",.1);tone(1320,.8,"sine",.08)};
+const sWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.25,"triangle",.22,i*.11));
+const sBad=()=>{tone(330,.3,"sine",.14);tone(262,.5,"sine",.14,.22)};
+const sBig=()=>{[523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,.35,"triangle",.22,i*.14));tone(1047,1,"sine",.15,1.2)};
+// muzik latar ceria (perlahan)
+const MEL=[523,0,659,0,784,659,523,0, 587,0,698,0,880,698,587,0, 659,0,784,0,1047,784,659,0, 587,659,523,0,392,0,523,0];
+function startMusic(){
+ if(musicTimer)return;
+ musicTimer=setInterval(()=>{
+  if(!soundOn||!AC||AC.state!=="running")return;
+  const f=MEL[mStep%MEL.length];
+  if(f)tone(f/2,.28,"triangle",.045);
+  if(mStep%8===0)tone(131*(mStep%16?1.33:1),.9,"sine",.03);
+  mStep++;
+ },260);
+}
+// Butang AKTIFKAN BUNYI / SENYAP
+$("snd").onclick=()=>{
+ if(!AC){soundOn=true;if(!initAudio())return;}
+ else if(soundOn){soundOn=false;master.gain.cancelScheduledValues(AC.currentTime);master.gain.value=0;}   // senyap serta-merta
+ else{soundOn=true;initAudio();master.gain.value=1;}
+ updateBtn();
+ if(soundOn)tone(784,.18,"triangle",.2),tone(1047,.25,"triangle",.2,.12);   // bunyi ujian
+};
+// Safari/iPad: jika audio terhenti (cth. selepas panggilan/tukar app), sambung semula pada sentuhan seterusnya
+["touchend","click"].forEach(ev=>document.addEventListener(ev,()=>{if(AC&&soundOn&&AC.state!=="running"){const p=AC.resume();if(p&&p.catch)p.catch(()=>{})}},true));
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&AC&&AC.state!=="running"){const p=AC.resume();if(p&&p.catch)p.catch(()=>{})}});
+
+/* ===== RODA ===== */
+function drawWheel(){
+ const W=cv.width,c=W/2,R=c-14,q=Math.PI/2;
+ cx.clearRect(0,0,W,W);
+ // bulatan luar
+ cx.beginPath();cx.arc(c,c,R+10,0,7);cx.fillStyle="#6d4c41";cx.fill();
+ for(let i=0;i<4;i++){
+  const a0=rot+i*q-q,a1=a0+q,T=TOPIK[i];
+  cx.beginPath();cx.moveTo(c,c);cx.arc(c,c,R,a0,a1);cx.closePath();
+  cx.fillStyle=T.c;cx.fill();cx.lineWidth=5;cx.strokeStyle="#fff";cx.stroke();
+  cx.save();cx.translate(c,c);cx.rotate(a0+q/2+q);   // label mengikut jejari
+  cx.rotate(-q);cx.translate(R*.58,0);cx.rotate(q);
+  cx.textAlign="center";cx.fillStyle=i===3?"#4e342e":"#fff";
+  cx.font="56px serif";cx.fillText(T.i,0,-18);
+  cx.font="bold 24px 'Trebuchet MS',Arial";
+  T.n.forEach((t,k)=>cx.fillText(t,0,22+k*26));
+  cx.restore();
+ }
+ // pasak
+ for(let i=0;i<4;i++){const a=rot+i*q-q;cx.beginPath();cx.arc(c+Math.cos(a)*(R+2),c+Math.sin(a)*(R+2),9,0,7);cx.fillStyle="#ffeb3b";cx.fill();}
+ cx.beginPath();cx.arc(c,c,38,0,7);cx.fillStyle="#fff";cx.fill();cx.lineWidth=6;cx.strokeStyle="#ffb300";cx.stroke();
+ cx.font="38px serif";cx.textAlign="center";cx.fillStyle="#000";cx.fillText("⭐",c,c+13);
+}
+// topik yang benar-benar berada di bawah jarum (atas roda)
+function detect(r){
+ const a=((-r%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+ return Math.floor(a/(Math.PI/2))%4;
+}
+function spin(){
+ if(busy||locked)return;
+ initAudio();sSpin();
+ busy=true;locked=true;$("spin").disabled=true;$("panel").style.display="none";
+ const q=Math.PI/2;
+ let a=Math.random()*2*Math.PI,f=a%q;           // sudut akhir rawak
+ if(f<.15||f>q-.15)a+=.4;                         // elak sempadan bahagian
+ const turns=5+Math.floor(Math.random()*3);
+ const start=rot,final=start+turns*2*Math.PI+((((-a-start)%(2*Math.PI))+2*Math.PI)%(2*Math.PI));
+ const dur=5200,t0=performance.now();let lastSeg=Math.floor(start/(q/2));
+ (function step(now){
+  const t=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-t,3);
+  rot=start+(final-start)*e;
+  const sg=Math.floor(rot/(q/2));if(sg!==lastSeg){lastSeg=sg;sTick();}
+  drawWheel();
+  if(t<1)requestAnimationFrame(step);
+  else{busy=false;stopped();}
+ })(t0);
+}
+function stopped(){
+ const ti=detect(rot);sBell();
+ const T=TOPIK[ti];
+ // paparkan topik, kemudian soalan secara automatik
+ const p=$("panel");p.style.display="block";
+ $("tp").textContent=T.i+" "+T.full;$("tp").style.background=T.c;
+ $("clk").innerHTML="";$("qtext").textContent="Topik dipilih: "+T.full+"!";$("opts").innerHTML="";$("fb").textContent="";$("ex").textContent="";$("next").style.display="none";
+ setTimeout(()=>showQ(ti),1400);
+}
+
+/* ===== SOALAN ===== */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function refill(t){pool[t]=shuffle([...Array(BANK[t].length).keys()])}
+function clockSVG(h){
+ let s='<svg width="170" height="170" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94" fill="#fff" stroke="#3949ab" stroke-width="8"/>';
+ for(let n=1;n<=12;n++){const a=n*Math.PI/6;s+=`<text x="${100+Math.sin(a)*74}" y="${100-Math.cos(a)*74+8}" font-size="22" font-weight="bold" text-anchor="middle" fill="#1a237e">${n}</text>`}
+ const ha=h*30*Math.PI/180;   // jarum pendek (jam), jarum panjang di 12
+ s+=`<line x1="100" y1="100" x2="${100+Math.sin(ha)*46}" y2="${100-Math.cos(ha)*46}" stroke="#d50000" stroke-width="10" stroke-linecap="round"/>`;
+ s+=`<line x1="100" y1="100" x2="100" y2="34" stroke="#1a237e" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#222"/></svg>`;
+ return s;
+}
+function showQ(ti){
+ if(!pool[ti].length)refill(ti);          // kocok semula bila topik habis
+ const qi=pool[ti].pop(),Q=BANK[ti][qi];
+ cur={ti,Q,ans:Q[2]};
+ $("qtext").textContent=Q[0];
+ $("clk").innerHTML=Q[4]?clockSVG(Q[4]):"";
+ const box=$("opts");box.innerHTML="";
+ Q[1].split("|").forEach((o,i)=>{
+  const b=document.createElement("button");b.className="opt";b.textContent=L[i]+". "+o;
+  b.onclick=()=>answer(i);box.appendChild(b);
+ });
+}
+function answer(i){
+ if(!cur||cur.done)return;cur.done=true;
+ const bs=[...document.querySelectorAll(".opt")];
+ bs.forEach(b=>b.disabled=true);
+ st.an++;
+ const fb=$("fb");
+ if(i===cur.ans){
+  st.ok++;st.sc+=10;bs[i].classList.add("ok");
+  fb.className="ok";fb.textContent="🎉 TAHNIAH! JAWAPAN KAMU BETUL!";sWin();confetti();
+ }else{
+  st.ng++;bs[i].classList.add("no");bs[cur.ans].classList.add("ok");
+  fb.className="no";fb.textContent="💪 CUBA LAGI! JANGAN PUTUS ASA!";sBad();
+ }
+ $("ex").textContent="Jawapan betul: "+L[cur.ans]+". "+(cur.Q[3]||"");
+ const n=$("next");n.style.display="inline-block";
+ n.textContent=st.an>=JUMLAH?"🏆 LIHAT KEPUTUSAN":"➡️ SPIN LAGI!";
+ update();
+}
+function update(){
+ $("sc").textContent=st.sc;$("an").textContent=st.an;$("ok").textContent=st.ok;$("ng").textContent=st.ng;
+ $("bar").style.width=(st.an/JUMLAH*100)+"%";$("pl").textContent="Kemajuan: "+st.an+" / "+JUMLAH;
+}
+$("next").onclick=()=>{
+ if(st.an>=JUMLAH){endGame();return}
+ $("panel").style.display="none";locked=false;spin();   // roda berpusing semula secara automatik
+};
+
+/* ===== KESAN ===== */
+function confetti(){
+ const E=["⭐","🌟","✨","🎊","🎉"];
+ for(let i=0;i<26;i++){
+  const d=document.createElement("div");d.className="conf";d.textContent=E[i%E.length];
+  d.style.left=Math.random()*100+"vw";d.style.animationDelay=Math.random()*.6+"s";d.style.fontSize=(22+Math.random()*22)+"px";
+  document.body.appendChild(d);setTimeout(()=>d.remove(),3200);
+ }
+}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));$(id).classList.add("on");window.scrollTo(0,0)}
+
+/* ===== MULA / TAMAT / MAIN SEMULA ===== */
+function reset(){
+ st={sc:0,an:0,ok:0,ng:0};pool=[[],[],[],[]];BANK.forEach((_,t)=>refill(t));
+ cur=null;busy=false;locked=false;$("spin").disabled=false;$("panel").style.display="none";update();
+}
+function endGame(){
+ locked=true;
+ $("e-sc").textContent=st.sc;$("e-ok").textContent=st.ok;$("e-ng").textContent=st.ng;
+ $("e-pc").textContent=Math.round(st.ok/JUMLAH*100)+"%";
+ const ch=$("chest");ch.className="chest";ch.textContent="🧰";
+ show("s-end");sBig();
+ setTimeout(()=>{ch.textContent="💎👑💰";ch.style.fontSize="80px";ch.className="chest open";confetti();setTimeout(confetti,1200)},900);
+}
+$("mula").onclick=()=>{initAudio();reset();show("s-game");drawWheel()};
+$("spin").onclick=spin;
+$("again").onclick=()=>{initAudio();$("chest").style.fontSize="";reset();show("s-game");drawWheel()};
+
+/* ===== LATAR BELAKANG ===== */
+(function(){
+ for(let i=0;i<45;i++){const s=document.createElement("div");s.className="star";const z=2+Math.random()*3;
+  s.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*60}vh;width:${z}px;height:${z}px;animation-delay:${Math.random()*2}s`;document.body.appendChild(s)}
+ [["☁️",8,"cloud",0],["☁️",22,"cloud",-15],["☁️",38,"cloud",-28]].forEach(([e,t,c,d])=>{
+  const x=document.createElement("div");x.className="deco "+c;x.textContent=e;x.style.top=t+"vh";x.style.animationDelay=d+"s";document.body.appendChild(x)});
+ [["🗺️","left:2vw;bottom:3vh"],["🏝️","right:3vw;bottom:2vh"],["🧰","left:46vw;bottom:1vh"],["🏴‍☠️","right:20vw;bottom:5vh"]].forEach(([e,p])=>{
+  const x=document.createElement("div");x.className="deco";x.textContent=e;x.style.cssText=p;x.style.opacity=".6";document.body.appendChild(x)});
+})();
+reset();drawWheel();
+</script>
+</body>
+</html>
